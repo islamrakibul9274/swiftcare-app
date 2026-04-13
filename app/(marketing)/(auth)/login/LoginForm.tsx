@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { getSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginForm() {
@@ -12,29 +12,42 @@ export default function LoginForm() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
 
-    try {
-      const res = await signIn('credentials', {
-        email,
-        password,
-        redirect: false,
-      });
+  try {
+    const res = await signIn('credentials', {
+      email,
+      password,
+      redirect: false,
+    });
 
-      if (res?.error) {
-        setError('Invalid email or password. Please try again.');
-        setIsLoading(false);
-      } else {
-        window.location.href = '/';
-      }
-    } catch (err) {
-      setError('An unexpected error occurred. Please contact support.');
+    if (res?.error) {
+      setError('Invalid email or password. Please try again.');
       setIsLoading(false);
-    }
-  };
+    } else {
+      // 2. Fetch the session manually to get the role immediately
+      const session = await getSession();
+      const role = (session?.user as any)?.role;
 
+      // 3. Determine the fast-track destination
+      let destination = '/';
+      if (role === 'ADMIN') destination = '/admin';
+      else if (role === 'BCBA') destination = '/director';
+      else if (role === 'RBT') destination = '/tech';
+
+      // 4. Use router.push for a fast SPA transition (no full reload)
+      router.push(destination);
+      
+      // 5. Tell Next.js to refresh the server data so the Sidebar updates
+      router.refresh();
+    }
+  } catch (err) {
+    setError('An unexpected error occurred. Please contact support.');
+    setIsLoading(false);
+  }
+};
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       {/* Error Banner */}
