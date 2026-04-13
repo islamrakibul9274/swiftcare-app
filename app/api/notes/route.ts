@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
 import User from "@/models/User"; // <-- We added the User model import
-import { auth } from "@/auth";
+import { auth } from "@/auth"
 
 export async function POST(req: Request) {
     try {

@@ -39,47 +39,53 @@ const Sidebar = ({ role }: SidebarProps) => {
   const links = getNavLinks();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 bg-[#0B1121] text-slate-300 transition-all duration-300 border-r border-slate-800/50 shadow-xl z-20">
+    <aside className="hidden md:flex flex-col w-64 bg-gradient-to-b from-[#0B1121] to-[#060914] text-slate-300 transition-all duration-300 border-r border-slate-800/50 shadow-2xl z-20">
       
       {/* Brand Header */}
-      <Link href="/" className="h-20 flex items-center px-6 border-b border-slate-800/80 hover:bg-white/5 transition-colors group">
-        <Logo className="w-8 h-8 mr-3 text-white" />
+      <Link href="/" className="h-20 flex items-center px-6 border-b border-white/5 hover:bg-white/[0.03] transition-colors group">
+        <Logo className="w-8 h-8 mr-3 text-white transition-transform duration-300 group-hover:scale-110" />
         <div className="flex flex-col justify-center">
           <span className="text-xl font-black text-white tracking-tight lowercase leading-none">swift</span>
-          <span className="text-[0.55rem] font-bold text-slate-400 tracking-[0.3em] uppercase mt-0.5">Care</span>
+          <span className="text-[0.55rem] font-bold text-swift-blue tracking-[0.3em] uppercase mt-0.5 opacity-80">Care</span>
         </div>
       </Link>
 
-      <div className="flex-1 py-8 px-4 space-y-1 overflow-y-auto">
-        <p className="px-3 text-xs font-bold text-slate-500 uppercase tracking-widest mb-4">
-          {role} Portal
+      <div className="flex-1 py-8 px-4 space-y-1.5 overflow-y-auto">
+        <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] mb-4">
+          {role} <span className="text-slate-600">Portal</span>
         </p>
 
         {/* Navigation Links */}
-        <nav className="space-y-1.5">
+        <nav className="space-y-2">
           {links.map((link) => {
-            // Check if exact match OR starts with path (for nested sub-pages)
             const isActive = pathname === link.href || (pathname.startsWith(`${link.href}/`) && link.href !== '/admin');
             
             return (
               <Link
                 key={link.name}
                 href={link.href}
-                className={`group flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                className={`group relative flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 overflow-hidden ${
                   isActive
-                    ? 'bg-swift-blue/15 text-swift-blue border border-swift-blue/20 shadow-inner'
-                    : 'text-slate-400 hover:bg-slate-800/50 hover:text-white hover:translate-x-1'
+                    ? 'bg-swift-blue/10 text-white border border-swift-blue/30 shadow-[0_0_20px_rgba(79,70,229,0.1)]'
+                    : 'text-slate-400 hover:bg-white/[0.04] hover:text-white hover:translate-x-1'
                 }`}
               >
+                {/* Active Indicator Line */}
+                {isActive && (
+                  <div className="absolute left-0 top-3 bottom-3 w-1 bg-swift-blue rounded-r-full shadow-[0_0_10px_rgba(79,70,229,0.8)]" />
+                )}
+                
                 <svg 
-                  className={`w-5 h-5 mr-3 shrink-0 transition-colors ${isActive ? 'text-swift-blue' : 'text-slate-500 group-hover:text-white'}`} 
+                  className={`w-5 h-5 mr-3 shrink-0 transition-all duration-300 ${
+                    isActive ? 'text-swift-blue scale-110' : 'text-slate-500 group-hover:text-white'
+                  }`} 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={isActive ? "2.5" : "2"} d={link.icon} />
                 </svg>
-                {link.name}
+                <span className="relative z-10">{link.name}</span>
               </Link>
             );
           })}
@@ -87,12 +93,12 @@ const Sidebar = ({ role }: SidebarProps) => {
       </div>
 
       {/* Footer / Escape Hatch */}
-      <div className="p-4 border-t border-slate-800/80 bg-slate-900/30">
+      <div className="p-4 border-t border-white/5 bg-black/20 backdrop-blur-sm">
         <Link
           href="/"
-          className="flex items-center px-3 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl transition-all group"
+          className="flex items-center px-4 py-3 text-sm font-medium text-slate-400 hover:text-white hover:bg-white/[0.05] border border-transparent hover:border-white/10 rounded-xl transition-all group"
         >
-          <svg className="w-5 h-5 mr-3 text-slate-500 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 mr-3 text-slate-500 group-hover:text-white transition-all duration-300 group-hover:-translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
           </svg>
           Back to Website

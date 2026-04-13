@@ -1,36 +1,33 @@
+// proxy.ts (Ensure this is the ONLY interception file in your root)
+import { auth } from "./auth";
 import { NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
-import type { NextRequest } from "next/server";
 
-const protectedRoutes = ["/admin", "/director", "/tech"];
-
-export default async function proxy(req: NextRequest) {
+export default auth((req) => {
   const { nextUrl } = req;
+  const isLoggedIn = !!req.auth;
+  const userRole = (req.auth?.user as any)?.role;
 
-  // Securely decode the session token without triggering Node.js database modules
-  const token = await getToken({ req, secret: process.env.AUTH_SECRET });
-  const isLoggedIn = !!token;
-  const userRole = token?.role as string;
-
+  const protectedRoutes = ["/admin", "/director", "/tech"];
   const isProtectedRoute = protectedRoutes.some(route => nextUrl.pathname.startsWith(route));
 
-  // 1. If not logged in and trying to access a protected route, redirect to login
+  // 1. If not logged in and trying to access a protected route -> Login
   if (isProtectedRoute && !isLoggedIn) {
     return NextResponse.redirect(new URL("/login", nextUrl));
   }
 
-  // 2. Role-Based Routing Logic
+  // 2. Role-Based Redirects for Entry Pages
+ // Now /login and /register will still redirect logged-in users to their portal,
+// but the homepage (/) is now accessible to everyone.
+const isGenericRoute = ["/login", "/register"].includes(nextUrl.pathname);
+
+  if (isLoggedIn && isGenericRoute) {
+    if (userRole === "ADMIN") return NextResponse.redirect(new URL("/admin", nextUrl));
+    if (userRole === "BCBA") return NextResponse.redirect(new URL("/director", nextUrl));
+    if (userRole === "RBT") return NextResponse.redirect(new URL("/tech", nextUrl));
+  }
+
+  // 3. Strict Access Control (The Bouncer)
   if (isLoggedIn) {
-    // REMOVED "/" from here so users can visit the homepage!
-    const isGenericRoute = nextUrl.pathname === "/login" || nextUrl.pathname === "/register" || nextUrl.pathname === "/dashboard";
-
-    if (isGenericRoute) {
-      if (userRole === "ADMIN") return NextResponse.redirect(new URL("/admin", nextUrl));
-      if (userRole === "BCBA") return NextResponse.redirect(new URL("/director", nextUrl));
-      if (userRole === "RBT") return NextResponse.redirect(new URL("/tech", nextUrl));
-    }
-
-    // 3. Strict Access Control
     if (nextUrl.pathname.startsWith("/admin") && userRole !== "ADMIN") {
       return NextResponse.redirect(new URL("/unauthorized", nextUrl));
     }
@@ -43,7 +40,7 @@ export default async function proxy(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],

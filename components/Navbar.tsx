@@ -90,6 +90,7 @@ const Navbar = () => {
           {/* Dynamic Auth & CTA Links */}
           {isLoggedIn ? (
             <div className="flex items-center space-x-6">
+              {/* Pointing to /login triggers the Middleware's role-based redirect */}
               <Link href="/login" className="cursor-pointer font-bold text-swift-blue hover:text-blue-700 transition">
                 Dashboard
               </Link>

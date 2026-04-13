@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
 import Claim from "@/models/Claim"; // <-- Import the new Claim model
-import { auth } from "@/auth";
+import { auth } from "@/auth"
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {

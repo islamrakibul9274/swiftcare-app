@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/db";
 import Claim from "@/models/Claim";
-import { auth } from "@/auth";
+import { auth } from "@/auth"
 
 export async function GET(req: Request) {
   try {

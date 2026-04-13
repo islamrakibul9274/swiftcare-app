@@ -1,4 +1,4 @@
-import { auth } from "@/auth";
+import { auth } from "@/auth"
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/dashboard/Sidebar";
 import Header from "@/components/dashboard/Header";
