@@ -27,7 +27,7 @@ export default function LoginForm() {
         setError('Invalid email or password. Please try again.');
         setIsLoading(false);
       } else {
-        router.refresh(); 
+        window.location.href = '/';
       }
     } catch (err) {
       setError('An unexpected error occurred. Please contact support.');
