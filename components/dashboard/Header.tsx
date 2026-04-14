@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useTransition } from 'react';
-import { logoutAction } from '@/app/actions/auth';
+import React, { useState } from 'react';
+import { signOut } from 'next-auth/react'; // Swap to client-side Auth.js logout
 
 interface HeaderProps {
   userName: string;
@@ -9,20 +9,20 @@ interface HeaderProps {
 }
 
 const Header = ({ userName, role }: HeaderProps) => {
-  const [isPending, startTransition] = useTransition();
+  // Swapped useTransition for useState since we are executing an async redirect
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    startTransition(() => {
-      logoutAction();
-    });
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    // This clears the client cache instantly, destroys the cookie, and redirects
+    await signOut({ callbackUrl: '/login' });
   };
 
   return (
     <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-4 md:px-8 shadow-sm sticky top-0 z-40">
       
-      {/* Left side: Mobile Menu Toggle (Visible only on mobile) & Title */}
+      {/* Left side: Mobile Menu Toggle & Title */}
       <div className="flex items-center space-x-4">
-        {/* Placeholder for a mobile hamburger menu button if you implement a sliding drawer later */}
         <button className="md:hidden p-2 text-slate-500 hover:text-brand-dark transition-colors rounded-lg hover:bg-slate-100">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
@@ -58,11 +58,11 @@ const Header = ({ userName, role }: HeaderProps) => {
         {/* Sign Out Button */}
         <button 
           onClick={handleLogout}
-          disabled={isPending}
+          disabled={isLoggingOut}
           className="group cursor-pointer flex items-center justify-center h-10 w-10 md:w-auto md:px-4 text-sm font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           aria-label="Sign Out"
         >
-          {isPending ? (
+          {isLoggingOut ? (
             <svg className="w-5 h-5 animate-spin text-slate-400" fill="none" viewBox="0 0 24 24">
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
