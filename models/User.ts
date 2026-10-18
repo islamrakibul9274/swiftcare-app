@@ -1,15 +1,28 @@
-import mongoose from 'mongoose';
-
-const UserSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { 
-    type: String, 
-    enum: ['ADMIN', 'BCBA', 'RBT'], // Clinical Director = BCBA, Technician = RBT
-    required: true 
+import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
+const schema = new Schema(
+  {
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: { type: String, required: true, select: false },
+    role: { type: String, enum: ["ADMIN", "BCBA", "RBT"], required: true },
+    clinicName: { type: String, required: true },
+    clinicId: String,
+    active: { type: Boolean, default: true },
+    forcePasswordChange: { type: Boolean, default: false },
+    sessionVersion: { type: Number, default: 0 },
+    credential: { type: String, default: "" },
+    credentialExpiresAt: Date,
+    notificationPreferences: { type: Boolean, default: true },
   },
-  clinicName: { type: String, required: true },
-}, { timestamps: true });
-
-export default mongoose.models.User || mongoose.model('User', UserSchema);
+  { timestamps: true, optimisticConcurrency: true },
+);
+schema.index({ clinicId: 1, role: 1, active: 1 });
+export type UserRecord = InferSchemaType<typeof schema>;
+export default (mongoose.models.User as Model<UserRecord>) ||
+  mongoose.model("User", schema);

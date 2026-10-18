@@ -1,44 +1,41 @@
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/db";
 import Note from "@/models/Note";
-import Claim from "@/models/Claim"; // <-- Import the new Claim model
-import { auth } from "@/auth"
+import { AppError } from "@/lib/errors";
+import { idSchema } from "@/lib/validation";
+import { api, body } from "@/lib/api";
+import { getActor, getClient, audit } from "@/lib/security";
+import { reviewNote } from "@/lib/clinical";
+import { reviewSchema } from "@/lib/validation";
+export const PATCH = api(
+  async (request, context: { params: Promise<{ id: string }> }) => ({
+    note: await reviewNote(
+      await getActor(["BCBA", "RBT"]),
+      (await context.params).id,
+      await body(request, reviewSchema),
+    ),
+    message: "Note updated.",
+  }),
+);
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const session = await auth();
-    if (!session?.user || (session.user as any).role === "RBT") {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 403 });
-    }
-
-    await dbConnect();
-    const resolvedParams = await params;
-
-    // 1. Update the note's status to "Approved"
-    const updatedNote = await Note.findByIdAndUpdate(
-      resolvedParams.id, 
-      { status: "Approved" }, 
-      { returnDocument: 'after' } 
-    );
-
-    if (!updatedNote) {
-      return NextResponse.json({ message: "Note not found" }, { status: 404 });
-    }
-
-    // 2. THE CLAIM ENGINE: Automatically generate a billing claim!
-    // We'll use a standard rate of $150.00 for a therapy session for this MVP
-    await Claim.create({
-      clientName: updatedNote.clientName,
-      noteId: updatedNote._id,
-      dateOfService: updatedNote.date,
-      amount: 150.00,
-      status: "Pending Submission",
-      billingCode: "97153"
-    });
-
-    return NextResponse.json({ message: "Note approved and Claim generated", note: updatedNote }, { status: 200 });
-  } catch (error) {
-    console.error("Failed to approve note:", error);
-    return NextResponse.json({ message: "Failed to approve note" }, { status: 500 });
-  }
-}
+export const GET = api(
+  async (_request, context: { params: Promise<{ id: string }> }) => {
+    const actor = await getActor(["RBT", "BCBA"]);
+    const id = (await context.params).id;
+    idSchema.parse(id);
+    const note = await Note.findOne({
+      _id: id,
+      clinicId: actor.clinicId,
+      ...(actor.role === "RBT" ? { rbtId: actor.id } : {}),
+    }).lean();
+    if (!note?.clientId) throw new AppError(404, "This note is unavailable.");
+    await getClient(actor, String(note.clientId));
+    await audit(actor, "view", "note", id);
+    return {
+      note: {
+        ...note,
+        comments: note.comments || [],
+        behaviors: note.behaviors || [],
+        revision: note.revision ?? 0,
+      },
+    };
+  },
+);

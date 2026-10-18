@@ -1,28 +1,33 @@
-import React from 'react';
-import Link from 'next/link';
-
-export default function UnauthorizedPage() {
+import Link from "next/link";
+import { logoutAction } from "@/app/actions/auth";
+export default async function Unauthorized({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const setup = (await searchParams).setup === "1";
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center bg-slate-50 px-4">
-      <div className="text-center max-w-md">
-        {/* Warning Icon */}
-        <div className="mx-auto w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mb-6">
-          <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-          </svg>
-        </div>
-        
-        <h1 className="text-3xl font-black text-brand-dark mb-2">Access Denied</h1>
-        <p className="text-slate-600 mb-8 text-lg">
-          You don't have the required clinical permissions to view this portal. If you believe this is a mistake, please contact your Clinic Administrator.
-        </p>
-        
-        <Link 
-          href="/login" 
-          className="inline-flex items-center justify-center px-8 py-3 text-base font-bold text-white bg-brand-indigo rounded-lg hover:bg-brand-indigo-hover transition-colors shadow-sm"
-        >
-          Return to Dashboard
+    <div className="error-page">
+      <span className="eyebrow">
+        {setup ? "Clinic setup" : "Workspace permissions"}
+      </span>
+      <h1>
+        {setup
+          ? "Your clinic access needs verification."
+          : "This area needs a different role."}
+      </h1>
+      <p className="muted">
+        {setup
+          ? "Your administrator must complete the verified clinic mapping before this account can access clinical records. Your existing records are preserved."
+          : "Your account does not have permission to open this workspace. Contact your clinic administrator if your role needs updating."}
+      </p>
+      <div className="row">
+        <Link href="/login" className="button primary">
+          Return to your workspace →
         </Link>
+        <form action={logoutAction}>
+          <button className="button secondary">Sign out</button>
+        </form>
       </div>
     </div>
   );

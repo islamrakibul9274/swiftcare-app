@@ -1,0 +1,4 @@
+{
+  "git": { "deploymentEnabled": { "feat/swiftcare-platform": false } },
+  "crons": [{ "path": "/api/cron/reminders", "schedule": "0 3 * * *" }]
+}

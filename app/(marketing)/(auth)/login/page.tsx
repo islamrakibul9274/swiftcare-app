@@ -1,42 +1,59 @@
-import Logo from "@/components/Logo";
 import LoginForm from "./LoginForm";
-
-export default function LoginPage() {
+import Link from "next/link";
+export const metadata = { title: "Sign in | SwiftCare" };
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const query = await searchParams;
   return (
-    <div className="min-h-screen relative flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50 overflow-hidden">
-      
-      {/* Subtle Background Glow */}
-      <div className="absolute inset-0 z-0 flex justify-center items-center pointer-events-none">
-        <div className="w-[800px] h-[800px] bg-brand-indigo/5 rounded-full blur-3xl mix-blend-multiply"></div>
-      </div>
-
-      <div className="relative z-10 sm:mx-auto sm:w-full sm:max-w-md animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <div className="flex justify-center mb-4">
-          <div className="p-3 bg-white rounded-2xl shadow-sm border border-slate-100">
-            <Logo className="w-14 h-14" />
-          </div>
-        </div>
-        <h2 className="mt-2 text-center text-3xl font-black text-brand-dark tracking-tight">
-          Welcome back
+    <section className="auth-wrap">
+      <div className="auth-story">
+        <span className="eyebrow">Your clinical workspace</span>
+        <h2>
+          Great care.
+          <br />
+          Clearly connected.
         </h2>
-        <p className="mt-2 text-center text-sm font-medium text-slate-500">
-          Enter your credentials to access the clinic portal.
+        <p>
+          Your sessions, clinical insights, and care team. Thoughtfully
+          connected in one workspace.
         </p>
+        <p className="small">Built for the people behind every breakthrough.</p>
       </div>
-
-      <div className="relative z-10 mt-8 sm:mx-auto sm:w-full sm:max-w-[420px] animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150 fill-mode-both">
-        <div className="bg-white py-8 px-6 shadow-xl shadow-slate-200/50 sm:rounded-2xl sm:px-10 border border-slate-200/60">
-          <LoginForm />
+      <div className="auth-card">
+        <span className="eyebrow">Your clinic workspace</span>
+        <h1>Sign in to SwiftCare.</h1>
+        <p className="muted">
+          Sign in with the account provided by your administrator.
+        </p>
+        <LoginForm
+          callbackUrl={
+            typeof query.callbackUrl === "string"
+              ? query.callbackUrl
+              : undefined
+          }
+          expired={query.expired === "1"}
+        />
+        <div className="auth-help">
+          New to your team?{" "}
+          <Link href="/register">Use your invitation to get started</Link>
         </div>
-        
-        {/* Help Link Footer */}
-        <p className="mt-8 text-center text-sm font-medium text-slate-500">
-          Need access?{" "}
-          <a href="#" className="text-swift-blue hover:text-blue-700 font-bold transition-colors">
-            Contact your administrator
-          </a>
-        </p>
+        {process.env.SWIFTCARE_DEMO === "true" && (
+          <div className="demo-credentials">
+            <strong>Synthetic demo clinic</strong>
+            <p>
+              Use <code>rbt@demo.swiftcare.example</code>,{" "}
+              <code>bcba@demo.swiftcare.example</code>, or{" "}
+              <code>admin@demo.swiftcare.example</code>.
+            </p>
+            <p>
+              Password: <code>SwiftCareDemo2026!</code>
+            </p>
+          </div>
+        )}
       </div>
-    </div>
+    </section>
   );
 }

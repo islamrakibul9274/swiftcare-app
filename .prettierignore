@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.local/
+.vercel/
+.env*
+playwright-report/
+test-results/
+package-lock.json
+next-env.d.ts
+AGENTS.md

@@ -1,0 +1,22 @@
+{
+  "clinics": [
+    {
+      "id": "example-clinic",
+      "name": "EXAMPLE — replace with a verified clinic",
+      "userIds": [
+        "100000000000000000000001",
+        "100000000000000000000002",
+        "100000000000000000000003"
+      ]
+    }
+  ],
+  "clients": [
+    {
+      "id": "200000000000000000000001",
+      "clinicId": "example-clinic",
+      "assignedBCBA": "100000000000000000000002",
+      "assignedRBTs": ["100000000000000000000003"]
+    }
+  ],
+  "notes": []
+}

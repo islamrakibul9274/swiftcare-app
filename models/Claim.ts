@@ -1,25 +1,32 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface IClaim extends Document {
-  clientName: string;
-  noteId: mongoose.Types.ObjectId;
-  dateOfService: Date;
-  amount: number;
-  status: "Pending Submission" | "Submitted" | "Paid" | "Denied";
-  billingCode: string;
-}
-
-const ClaimSchema: Schema = new Schema({
-  clientName: { type: String, required: true },
-  noteId: { type: Schema.Types.ObjectId, ref: 'Note', required: true },
-  dateOfService: { type: Date, required: true },
-  amount: { type: Number, required: true },
-  status: { 
-    type: String, 
-    enum: ["Pending Submission", "Submitted", "Paid", "Denied"], 
-    default: "Pending Submission" 
+import mongoose, { Schema, type InferSchemaType, type Model } from "mongoose";
+const schema = new Schema(
+  {
+    clinicId: String,
+    clientId: { type: Schema.Types.ObjectId, ref: "Client" },
+    clientName: { type: String, required: true },
+    noteId: { type: Schema.Types.ObjectId, ref: "Note", required: true },
+    sourceKey: String,
+    dateOfService: { type: Date, required: true },
+    amount: { type: Number, required: true, min: 0 },
+    units: { type: Number, min: 0, default: 0 },
+    ratePerUnit: { type: Number, min: 0, default: 0 },
+    status: {
+      type: String,
+      enum: ["Pending Submission", "Submitted", "Paid", "Denied"],
+      default: "Pending Submission",
+    },
+    billingCode: { type: String, default: "97153" },
+    requiresReview: { type: Boolean, default: true },
+    payerReference: { type: String, default: "" },
+    updatedBy: String,
   },
-  billingCode: { type: String, default: "97153" }, // Standard ABA Therapy Billing Code
-});
-
-export default mongoose.models.Claim || mongoose.model<IClaim>("Claim", ClaimSchema);
+  { timestamps: true, optimisticConcurrency: true },
+);
+schema.index({ clinicId: 1, status: 1, dateOfService: -1 });
+schema.index(
+  { sourceKey: 1 },
+  { unique: true, partialFilterExpression: { sourceKey: { $type: "string" } } },
+);
+export type ClaimRecord = InferSchemaType<typeof schema>;
+export default (mongoose.models.Claim as Model<ClaimRecord>) ||
+  mongoose.model("Claim", schema);

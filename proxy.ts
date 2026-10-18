@@ -1,47 +1,58 @@
-// proxy.ts (Ensure this is the ONLY interception file in your root)
-import { auth } from "./auth";
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
-
-export default auth((req) => {
-  const { nextUrl } = req;
-  const isLoggedIn = !!req.auth;
-  const userRole = (req.auth?.user as any)?.role;
-
-  const protectedRoutes = ["/admin", "/director", "/tech"];
-  const isProtectedRoute = protectedRoutes.some(route => nextUrl.pathname.startsWith(route));
-
-  // 1. If not logged in and trying to access a protected route -> Login
-  if (isProtectedRoute && !isLoggedIn) {
-    return NextResponse.redirect(new URL("/login", nextUrl));
+import { roleHome } from "@/lib/policy";
+export default auth((request) => {
+  const path = request.nextUrl.pathname;
+  const roots = [
+    "/admin",
+    "/director",
+    "/tech",
+    "/clients",
+    "/schedule",
+    "/settings",
+    "/notifications",
+  ];
+  const protectedPath = roots.some(
+    (p) => path === p || path.startsWith(p + "/"),
+  );
+  const user = request.auth?.user;
+  if (protectedPath && !user?.id) {
+    const url = new URL("/login", request.url);
+    url.searchParams.set("callbackUrl", path + request.nextUrl.search);
+    return NextResponse.redirect(url);
   }
-
-  // 2. Role-Based Redirects for Entry Pages
- // Now /login and /register will still redirect logged-in users to their portal,
-// but the homepage (/) is now accessible to everyone.
-const isGenericRoute = ["/login", "/register"].includes(nextUrl.pathname);
-
-  if (isLoggedIn && isGenericRoute) {
-    if (userRole === "ADMIN") return NextResponse.redirect(new URL("/admin", nextUrl));
-    if (userRole === "BCBA") return NextResponse.redirect(new URL("/director", nextUrl));
-    if (userRole === "RBT") return NextResponse.redirect(new URL("/tech", nextUrl));
+  if (user?.id) {
+    if (
+      ["/login", "/register"].includes(path) &&
+      !(
+        path === "/login" && request.nextUrl.searchParams.get("expired") === "1"
+      )
+    )
+      return NextResponse.redirect(new URL(roleHome(user.role), request.url));
+    if (protectedPath && user.forcePasswordChange && path !== "/settings")
+      return NextResponse.redirect(
+        new URL("/settings?required=1", request.url),
+      );
+    for (const [root, role] of [
+      ["/admin", "ADMIN"],
+      ["/director", "BCBA"],
+      ["/tech", "RBT"],
+    ])
+      if ((path === root || path.startsWith(root + "/")) && user.role !== role)
+        return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-
-  // 3. Strict Access Control (The Bouncer)
-  if (isLoggedIn) {
-    if (nextUrl.pathname.startsWith("/admin") && userRole !== "ADMIN") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-    if (nextUrl.pathname.startsWith("/director") && userRole !== "BCBA") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-    if (nextUrl.pathname.startsWith("/tech") && userRole !== "RBT") {
-      return NextResponse.redirect(new URL("/unauthorized", nextUrl));
-    }
-  }
-
   return NextResponse.next();
 });
-
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/admin/:path*",
+    "/director/:path*",
+    "/tech/:path*",
+    "/clients/:path*",
+    "/schedule/:path*",
+    "/settings/:path*",
+    "/notifications/:path*",
+    "/login",
+    "/register",
+  ],
 };
