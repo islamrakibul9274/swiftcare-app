@@ -16,6 +16,8 @@
 
 The hosted preview uses the `swiftcare_preview_20261018` database on the existing Atlas cluster, with synthetic demo records only. Production records are never copied. Vercel environment overrides are scoped to the `feat/swiftcare-platform` preview branch: `MONGODB_URI`, a separate `AUTH_SECRET`, the preview `AUTH_URL`, `AUTH_TRUST_HOST=true`, and `SWIFTCARE_DEMO=true`. `MONGOMS_DISABLE_POSTINSTALL=1` avoids downloading the local test database binary during cloud builds. Production environment variables are unchanged.
 
+The verified preview URL is **https://swiftcare-preview-rumel9274.vercel.app**. Git automatic preview deployment is enabled after the initial branch-only environment setup. After a later successful deployment, move the readable alias with `vercel alias set <ready-preview-url> swiftcare-preview-rumel9274.vercel.app`. Never use `--prod` until the verified migration and real-data operational review are complete.
+
 To prepare another explicitly named, empty preview database from configured Atlas connectivity:
 
 ```bash

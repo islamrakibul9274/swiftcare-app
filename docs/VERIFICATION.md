@@ -25,7 +25,9 @@ Read-only production inspection found 4 accounts, 5 notes and 2 claims missing v
 
 The preview uses a separate `swiftcare_preview_20261018` database, a new Auth.js secret and branch-specific environment overrides. Its records and sign-in credentials are visibly labeled synthetic demo data. Do not enter patient information. The guarded preview seed refuses the source database and any target that already contains collections. It never resets or deletes records.
 
-The release README will link to the verified Vercel preview after its build reaches `READY`. Production cutover requires independently reviewed account/client/note mappings; clinic names alone are insufficient evidence of ownership. See [deployment and migration instructions](DEPLOYMENT.md).
+Vercel successfully built the release on Node.js 24.x and reached `READY`. The [live preview](https://swiftcare-preview-rumel9274.vercel.app) returned HTTP 200; hosted HTTP checks passed for RBT, BCBA and Admin sign-in/workspace reads, anonymous reads returned 401, forbidden role operations returned 403, and Admin clinical session redaction passed. The actual demo database contains 4 synthetic users, 4 clients (including a separate-clinic boundary fixture), 45 sessions, 42 notes and 38 claims at seed time. Auth smoke checks create preview-only login/rate/audit metadata.
+
+Production cutover requires independently reviewed account/client/note mappings; clinic names alone are insufficient evidence of ownership. A second read-only inspection confirmed the original unmapped record counts remained unchanged after preview seeding. See [deployment and migration instructions](DEPLOYMENT.md).
 
 ## Limits
 
