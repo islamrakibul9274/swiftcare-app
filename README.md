@@ -4,11 +4,17 @@ A Next.js 16 workspace for ABA care teams: session observations, clinician-revie
 
 The interface uses a **white canvas, neutral sidebar, dark typography, and monochrome controls**. Light mode is the default. Optional system/dark appearance is available in Settings. No green or purple brand palette is used.
 
+## Live application
+
+**[Open SwiftCare](https://swiftcare-app.vercel.app/)** — production uses the redesigned workspace and the original database. Sign in with your existing account and password; migrated accounts must choose a new password on first sign-in.
+
+The four existing staff accounts have a user-verified clinic mapping. Five historical notes and two claims remain preserved but inaccessible until their client relationships are verified; no placeholder client records or dates of birth were invented. See [production release notes](docs/PRODUCTION_RELEASE.md).
+
 ## Live preview
 
 **[Open the latest SwiftCare preview](https://swiftcare-preview-rumel9274.vercel.app)** — verified on October 18, 2026. The white redesign and new workflows are on [`feat/swiftcare-platform`](https://github.com/islamrakibul9274/swiftcare-app/tree/feat/swiftcare-platform).
 
-This preview uses a separate database containing **synthetic demo records only**. Sign in with the role accounts below; never enter real patient information. Hosted HTTP verification passed for all three role sign-ins, workspace reads, anonymous/role access denials, and Admin clinical-data redaction. The existing production deployment and its records remain unchanged. Verified legacy mappings are required before production cutover.
+This preview uses a separate database containing **synthetic demo records only**. Sign in with the role accounts below; never enter real patient information. Hosted HTTP verification passed for all three role sign-ins, workspace reads, anonymous/role access denials, and Admin clinical-data redaction. The preview remains separate from production. Demo credentials do not work on the production site.
 
 ## Run the isolated demo
 
@@ -87,7 +93,7 @@ npm run bootstrap:admin -- --apply --name="Clinic Administrator" --email="admin@
 
 The script refuses to create a second initial Admin for an already provisioned clinic. It requires a password change on first sign-in. Never place an actual password in command arguments or Git.
 
-For **existing production data**, read [the migration instructions](docs/DEPLOYMENT.md) before deployment. Old records lack trustworthy clinic/client relationships. The application denies access to unmapped accounts and records rather than guessing ownership from clinic names or client display names. Password hashes and legacy fields are preserved. No migration has been applied to the connected production database.
+For **existing production data**, read [the migration instructions](docs/DEPLOYMENT.md) before deployment. Old records lack trustworthy clinic/client relationships. The application denies access to unmapped accounts and records rather than guessing ownership from clinic names or client display names. Password hashes and legacy fields are preserved. The October 23 production release applied the user-verified staff clinic mapping only. Historical notes and claims remain unchanged pending verified client mappings.
 
 ```bash
 # Read-only counts; no index or data writes
